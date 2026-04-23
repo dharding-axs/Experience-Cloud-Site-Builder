@@ -1,7 +1,6 @@
 ---
 name: experience-cloud-site-builder
-description: End-to-end scaffold, generate, deploy, and document a Salesforce Experience Cloud site using Claude Code
-type: skill
+description: End-to-end scaffold, generate, deploy, and document a Salesforce Experience Cloud site using Claude Code. Gathers requirements, plans the build, scaffolds LWC components, deploys to org, and pushes to GitHub.
 ---
 
 # Experience Cloud Site Builder
