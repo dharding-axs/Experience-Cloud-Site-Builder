@@ -20,11 +20,21 @@ Invoke this skill when the user asks to:
 ## Phase 1: Gather Requirements
 
 * Ask the user for:
-    * Site name and type (LWR vs Aura)
-    * Pages needed (e.g., Home, Resource Library, Case Submission)
-    * Key objects/data to surface (e.g., Cases, Knowledge, Opportunities)
-    * GitHub repo URL (optional)
-    * Target Salesforce org alias (default: whatever `sf org list` returns as default)
+    * **Site name and type** (LWR vs Aura)
+    * **Pages needed** (e.g., Home, Resource Library, Case Submission)
+    * **Key objects/data** to surface (e.g., Cases, Knowledge, Opportunities)
+    * **Branding/Theme** (optional):
+        * Primary brand color (hex code, e.g., #304CB2 for Southwest blue)
+        * Secondary/accent color
+        * Logo file path or URL
+        * Font preferences (if specific fonts required)
+        * Custom CSS requirements
+    * **Page layout preferences** (optional):
+        * Header style (full-width hero, compact, with/without search)
+        * Content layout (1-column, 2-column, grid)
+        * Footer content and links
+    * **GitHub repo URL** (optional)
+    * **Target Salesforce org alias** (default: whatever `sf org list` returns as default)
 * If a GitHub repo is provided, clone it and scan for reusable LWC components
 
 ## Phase 2: Plan the Build
@@ -49,9 +59,13 @@ Invoke this skill when the user asks to:
     * `force-app/main/default/classes/` — Apex controllers
 * For each LWC component generate:
     * `<component>.html` — template with slots and data bindings
-    * `<component>.js` — controller with wire adapters
-    * `<component>.css` — scoped styles using design tokens
-    * `<component>.js-meta.xml` — targets `lightningCommunity__Page`
+    * `<component>.js` — controller with wire adapters and @api properties for customization
+    * `<component>.css` — scoped styles using design tokens AND brand colors from requirements
+    * `<component>.js-meta.xml` — targets `lightningCommunity__Page` with configurable properties:
+        * Text properties (titles, labels, placeholders)
+        * Color properties (brandColor, accentColor)
+        * Boolean toggles (showFeature, enableX)
+        * Number properties (maxItems, columnCount)
 * For each Apex controller generate:
     * `<Controller>.cls` — with `@AuraEnabled(cacheable=true)` methods
     * `<Controller>_Test.cls` — comprehensive test coverage (85%+)
@@ -185,3 +199,225 @@ Create `force-app/main/default/networks/<SiteName>.network-meta.xml`:
 ```
 
 **Note**: Network metadata creates the site but it will be in "UnderConstruction" status - user must activate via Experience Builder UI.
+
+## CSS & Branding Customization Guidelines
+
+### CSS Variable Strategy
+
+Generate a shared CSS file with brand-specific custom properties:
+
+**`force-app/main/default/staticresources/siteTheme.css`:**
+
+```css
+:root {
+    /* Brand Colors */
+    --brand-primary: #304CB2;           /* From requirements */
+    --brand-secondary: #1B4596;
+    --brand-accent: #F7931E;
+    --brand-text-on-primary: #FFFFFF;
+    
+    /* Semantic Colors */
+    --color-background: #FFFFFF;
+    --color-background-alt: #F3F3F3;
+    --color-text-default: #181818;
+    --color-text-secondary: #706E6B;
+    --color-border: #C9C9C9;
+    
+    /* Spacing Scale */
+    --spacing-xs: 0.25rem;
+    --spacing-sm: 0.5rem;
+    --spacing-md: 1rem;
+    --spacing-lg: 1.5rem;
+    --spacing-xl: 2rem;
+    --spacing-xxl: 3rem;
+    
+    /* Typography */
+    --font-family-base: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --font-family-heading: var(--font-family-base);
+    --font-size-base: 1rem;
+    --font-size-sm: 0.875rem;
+    --font-size-lg: 1.125rem;
+    --font-size-xl: 1.25rem;
+    --font-size-2xl: 1.5rem;
+    --font-size-3xl: 2rem;
+    
+    /* Borders & Radius */
+    --border-radius-sm: 4px;
+    --border-radius-md: 8px;
+    --border-radius-lg: 12px;
+    
+    /* Shadows */
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+    
+    /* Layout */
+    --max-content-width: 1200px;
+    --header-height: 64px;
+}
+```
+
+### Component CSS Pattern
+
+Each LWC component should use both SLDS tokens (for compatibility) AND custom brand variables:
+
+```css
+.hero-section {
+    /* Use custom property with SLDS fallback */
+    background: linear-gradient(135deg, 
+        var(--brand-primary, var(--lwc-brandPrimary, #0176d3)) 0%, 
+        var(--brand-secondary, var(--lwc-brandPrimaryDark, #014486)) 100%
+    );
+    padding: var(--spacing-xxl, 3rem) var(--spacing-lg, 1.5rem);
+    color: var(--brand-text-on-primary, white);
+}
+
+.card-title {
+    color: var(--color-text-default, var(--lwc-colorTextDefault, #181818));
+    font-family: var(--font-family-heading);
+    font-size: var(--font-size-xl, 1.25rem);
+}
+```
+
+### Configurable Properties in js-meta.xml
+
+Make components highly configurable through Experience Builder:
+
+```xml
+<targetConfig targets="lightningCommunity__Default">
+    <!-- Text Properties -->
+    <property name="title" type="String" default="Welcome" 
+              label="Title" description="Main heading text"/>
+    <property name="subtitle" type="String" default="Find what you need" 
+              label="Subtitle" description="Subheading text"/>
+    
+    <!-- Color Properties -->
+    <property name="backgroundColor" type="String" default="#304CB2" 
+              label="Background Color" description="Hex color code (e.g., #304CB2)"/>
+    <property name="textColor" type="String" default="#FFFFFF" 
+              label="Text Color" description="Hex color code for text"/>
+    
+    <!-- Boolean Toggles -->
+    <property name="showLogo" type="Boolean" default="true" 
+              label="Show Logo" description="Display company logo"/>
+    <property name="enableSearch" type="Boolean" default="true" 
+              label="Enable Search" description="Show search functionality"/>
+    
+    <!-- Number Properties -->
+    <property name="maxItems" type="Integer" default="9" 
+              label="Max Items" description="Maximum number of items to display"/>
+    <property name="columnCount" type="Integer" default="3" 
+              label="Columns" description="Number of columns in grid (1-4)"/>
+</targetConfig>
+```
+
+### Logo & Image Handling
+
+For logos and custom images:
+
+1. **Static Resource Approach**:
+   - Upload logo to Static Resources: `force-app/main/default/staticresources/siteLogo.png`
+   - Reference in component: `import logoUrl from '@salesforce/resourceUrl/siteLogo';`
+
+2. **Content Management System (CMS) Approach**:
+   - Use CMS for dynamic images
+   - Reference via CMS API
+
+3. **External URL Approach**:
+   - Make logo URL a configurable property
+   - Use `<img src={logoUrl} alt="Company Logo" />`
+
+### Page Layout Customization
+
+Generate page layouts with configurable regions in `digitalExperiences/`:
+
+```json
+{
+  "type": "sfdc_cms__view",
+  "title": "Home",
+  "regions": [
+    {
+      "id": "header",
+      "regionName": "Header",
+      "components": [
+        {
+          "componentName": "c:siteHeader",
+          "componentAttributes": {
+            "logoUrl": "/resource/siteLogo",
+            "showSearch": true,
+            "backgroundColor": "#304CB2"
+          }
+        }
+      ]
+    },
+    {
+      "id": "hero",
+      "regionName": "Hero",
+      "components": [
+        {
+          "componentName": "c:homePageHero",
+          "componentAttributes": {
+            "title": "Southwest Ask Me Anything",
+            "backgroundColor": "#304CB2",
+            "textColor": "#FFFFFF"
+          }
+        }
+      ]
+    },
+    {
+      "id": "content",
+      "regionName": "Main Content",
+      "type": "grid",
+      "columns": 3,
+      "components": []
+    }
+  ]
+}
+```
+
+### Responsive Design Requirements
+
+All components must include responsive breakpoints:
+
+```css
+/* Desktop: Default */
+.component-container {
+    max-width: var(--max-content-width, 1200px);
+}
+
+/* Tablet (≤1024px) */
+@media (max-width: 1024px) {
+    .grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* Mobile (≤768px) */
+@media (max-width: 768px) {
+    .grid { grid-template-columns: 1fr; }
+    .hero-title { font-size: var(--font-size-2xl, 1.5rem); }
+}
+
+/* Small Mobile (≤480px) */
+@media (max-width: 480px) {
+    .component-container { padding: var(--spacing-md, 1rem); }
+}
+```
+
+### Custom Font Integration
+
+If custom fonts required:
+
+1. **Upload font files** to Static Resources
+2. **Define @font-face** in CSS:
+
+```css
+@font-face {
+    font-family: 'BrandFont';
+    src: url('/resource/BrandFont') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+}
+
+:root {
+    --font-family-base: 'BrandFont', -apple-system, sans-serif;
+}
+```
