@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Grants guest users access to the Apex chat controller and Knowledge articles.
+     REPLACE: {{Prefix}}AgentChatController → your Apex class name.
+     Assign to the Experience Cloud site guest user.
+     Do NOT include FLS for Title, Summary, UrlName — standard fields cannot be deployed via FLS. -->
+<PermissionSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>Grants guest users access to the AgentChatController Apex class and Knowledge articles for the inline chat.</description>
+    <hasActivationRequired>false</hasActivationRequired>
+    <label>Chat Guest Access</label>
+    <classAccesses>
+        <apexClass>{{Prefix}}AgentChatController</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <objectPermissions>
+        <allowCreate>false</allowCreate>
+        <allowDelete>false</allowDelete>
+        <allowEdit>false</allowEdit>
+        <allowRead>true</allowRead>
+        <modifyAllRecords>false</modifyAllRecords>
+        <object>Knowledge__kav</object>
+        <viewAllRecords>false</viewAllRecords>
+    </objectPermissions>
+</PermissionSet>

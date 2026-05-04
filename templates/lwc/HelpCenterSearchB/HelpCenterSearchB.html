@@ -1,0 +1,160 @@
+<!-- Concept B: Search-to-Chat transformation. Replace {{prefix}}- with your prefix.
+     The search box transforms into a live chat panel when the user submits a query.
+     Login panel slides in from the right using CSS flex-basis animation. -->
+<template>
+    <section class={sectionClass}>
+        <div class="{{prefix}}-search-inner">
+            <template lwc:if={chatActive}>
+                <div class="{{prefix}}-chat-panel">
+                    <div class="{{prefix}}-chat-header">
+                        <span class="{{prefix}}-chat-agent-name">Ask me anything</span>
+                        <button class="{{prefix}}-chat-close" onclick={handleCloseChat} aria-label="Close chat">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5">
+                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class={chatBodyClass}>
+                        <div class="{{prefix}}-chat-messages">
+                            <template for:each={messages} for:item="msg">
+                                <div key={msg.id} class={msg.containerClass}>
+                                    <div class={msg.bubbleClass}>
+                                        {msg.text}
+                                    </div>
+                                    <template lwc:if={msg.hasPills}>
+                                        <div class="{{prefix}}-inline-pills">
+                                            <template for:each={msg.pills} for:item="pill">
+                                                <button key={pill.id}
+                                                        class="{{prefix}}-inline-pill"
+                                                        onclick={handleInlinePillClick}
+                                                        data-action={pill.action}
+                                                        data-query={pill.query}
+                                                        data-msg-id={msg.id}>
+                                                    {pill.label}
+                                                </button>
+                                            </template>
+                                        </div>
+                                    </template>
+                                    <span class="{{prefix}}-msg-time">{msg.time}</span>
+                                </div>
+                            </template>
+                            <template lwc:if={isTyping}>
+                                <div class="{{prefix}}-msg-row {{prefix}}-msg-agent">
+                                    <div class="{{prefix}}-msg-bubble {{prefix}}-bubble-agent {{prefix}}-typing">
+                                        <span class="{{prefix}}-typing-dot"></span>
+                                        <span class="{{prefix}}-typing-dot"></span>
+                                        <span class="{{prefix}}-typing-dot"></span>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                        <div class={loginPanelClass}>
+                            <div class="{{prefix}}-login-panel-inner">
+                                <button class="{{prefix}}-login-panel-close" onclick={handleLoginClose} aria-label="Close login">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2.5">
+                                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                                    </svg>
+                                </button>
+                                <div class="{{prefix}}-login-panel-header">
+                                    <!-- CUSTOMER-SPECIFIC: update title/subtitle to match client loyalty program -->
+                                    <h3 class="{{prefix}}-login-panel-title">Account Login</h3>
+                                    <p class="{{prefix}}-login-panel-subtitle">Sign in to access your account details</p>
+                                </div>
+                                <div class="{{prefix}}-login-panel-body">
+                                    <div class="{{prefix}}-login-field">
+                                        <label class="{{prefix}}-login-label">Username</label>
+                                        <input type="text"
+                                               class="{{prefix}}-login-input"
+                                               placeholder="Enter username"
+                                               data-field="username"
+                                               oninput={handleLoginInput} />
+                                    </div>
+                                    <div class="{{prefix}}-login-field">
+                                        <label class="{{prefix}}-login-label">Password</label>
+                                        <input type="password"
+                                               class="{{prefix}}-login-input"
+                                               placeholder="Enter password"
+                                               data-field="password"
+                                               oninput={handleLoginInput}
+                                               onkeyup={handleLoginKeyUp} />
+                                    </div>
+                                    <template lwc:if={loginError}>
+                                        <p class="{{prefix}}-login-error">{loginError}</p>
+                                    </template>
+                                    <button class="{{prefix}}-login-submit" onclick={handleLoginSubmit} disabled={loginSubmitting}>
+                                        <template lwc:if={loginSubmitting}>
+                                            Signing in...
+                                        </template>
+                                        <template lwc:else>
+                                            Sign In
+                                        </template>
+                                    </button>
+                                    <p class="{{prefix}}-login-forgot">Forgot password?</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </template>
+
+            <div class={searchBoxClass}>
+                <template lwc:if={showSearchHeader}>
+                    <h2 class="{{prefix}}-search-title">Ask me anything</h2>
+                    <!-- CUSTOMER-SPECIFIC: update subtitle to match client brand voice -->
+                    <p class="{{prefix}}-search-subtitle">Real answers, right when you need them.</p>
+                </template>
+                <div class="{{prefix}}-search-input-wrap">
+                    <div class="{{prefix}}-input-inner">
+                        <input type="text"
+                               class="{{prefix}}-search-input"
+                               placeholder={inputPlaceholder}
+                               value={searchTerm}
+                               oninput={handleInput}
+                               onkeyup={handleKeyUp}
+                               onfocus={handleFocus} />
+                        <button class="{{prefix}}-icon-btn {{prefix}}-hide-mobile" aria-label="Voice chat">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                                <rect x="3" y="10" width="2" height="4" rx="1" fill="#304CB2"></rect>
+                                <rect x="7" y="7" width="2" height="10" rx="1" fill="#304CB2"></rect>
+                                <rect x="11" y="4" width="2" height="16" rx="1" fill="#304CB2"></rect>
+                                <rect x="15" y="7" width="2" height="10" rx="1" fill="#304CB2"></rect>
+                                <rect x="19" y="10" width="2" height="4" rx="1" fill="#304CB2"></rect>
+                            </svg>
+                        </button>
+                    </div>
+                    <button class="{{prefix}}-send-btn" onclick={handleSubmit} aria-label="Send">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#304CB2" stroke-width="2">
+                            <line x1="22" y1="2" x2="11" y2="13"></line>
+                            <polygon points="22 2 15 22 11 13 2 9 22 2" fill="none"></polygon>
+                        </svg>
+                    </button>
+                </div>
+                <template lwc:if={showSuggestions}>
+                    <div class="{{prefix}}-suggestions">
+                        <template for:each={suggestions} for:item="suggestion">
+                            <button key={suggestion.id} class="{{prefix}}-suggestion-chip" onclick={handleSuggestionClick} data-query={suggestion.query} data-topic={suggestion.topic}>
+                                {suggestion.label}
+                            </button>
+                        </template>
+                    </div>
+                </template>
+                <template lwc:if={showContextPills}>
+                    <div class="{{prefix}}-suggestions">
+                        <template for:each={activePills} for:item="pill">
+                            <button key={pill.id}
+                                    class="{{prefix}}-suggestion-chip"
+                                    onclick={handlePillClick}
+                                    data-query={pill.query}
+                                    data-id={pill.id}
+                                    data-topic={pill.topic}>
+                                {pill.label}
+                            </button>
+                        </template>
+                    </div>
+                </template>
+            </div>
+        </div>
+    </section>
+</template>

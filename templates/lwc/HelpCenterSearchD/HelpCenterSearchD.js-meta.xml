@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- NOTE: Do NOT add targetConfigs while any Experience Builder page instances reference this component.
+     Remove page instances first, then update this file. -->
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>62.0</apiVersion>
+    <isExposed>true</isExposed>
+    <targets>
+        <target>lightningCommunity__Page</target>
+        <target>lightningCommunity__Default</target>
+    </targets>
+    <masterLabel>{{ClientName}} Help Center Search - Concept D</masterLabel>
+</LightningComponentBundle>

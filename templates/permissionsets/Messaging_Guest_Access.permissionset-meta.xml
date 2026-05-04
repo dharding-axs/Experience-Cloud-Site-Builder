@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Assign to BOTH guest users: Experience Cloud site guest user AND ESW backing site guest user.
+     areGuestUsersAllowed must also be true in EmbeddedServiceConfig — check after every new deployment. -->
+<PermissionSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>Grants guest users access to Messaging objects required for the Embedded Messaging chat widget.</description>
+    <hasActivationRequired>false</hasActivationRequired>
+    <label>Messaging Guest Access</label>
+    <objectPermissions>
+        <allowCreate>true</allowCreate>
+        <allowDelete>false</allowDelete>
+        <allowEdit>false</allowEdit>
+        <allowRead>true</allowRead>
+        <modifyAllRecords>false</modifyAllRecords>
+        <object>MessagingSession</object>
+        <viewAllRecords>false</viewAllRecords>
+    </objectPermissions>
+    <objectPermissions>
+        <allowCreate>true</allowCreate>
+        <allowDelete>false</allowDelete>
+        <allowEdit>false</allowEdit>
+        <allowRead>true</allowRead>
+        <modifyAllRecords>false</modifyAllRecords>
+        <object>MessagingEndUser</object>
+        <viewAllRecords>false</viewAllRecords>
+    </objectPermissions>
+    <objectPermissions>
+        <allowCreate>false</allowCreate>
+        <allowDelete>false</allowDelete>
+        <allowEdit>false</allowEdit>
+        <allowRead>true</allowRead>
+        <modifyAllRecords>false</modifyAllRecords>
+        <object>MessagingChannel</object>
+        <viewAllRecords>false</viewAllRecords>
+    </objectPermissions>
+</PermissionSet>

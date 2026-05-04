@@ -1,0 +1,112 @@
+/* Global CSS for LWR Help Center sites.
+ * Load via swaGlobalStyles LWC (loadStyle) — <link> tags do NOT work in LWR.
+ * MUST be on every page in Experience Builder (drag the GlobalStyles component).
+ *
+ * This file has two jobs:
+ *   1. Embedded Messaging counter-rules — restore the chat FAB after LWC * reset collapses it
+ *   2. LWR layout overrides — full-width, zero-gap between components
+ */
+
+/* ── Embedded Messaging counter-rules ──────────────────────────────────────
+ * The LWC * { margin: 0 !important; padding: 0 !important; } reset leaks in LWR
+ * (no Shadow DOM) and collapses .embedded-messaging to height:0.
+ * These higher-specificity rules restore it.
+ * WHY: class selector (0,1,0) beats universal selector (0,0,0) even with !important.
+ */
+.embedded-messaging,
+.embedded-messaging *,
+.embeddedMessagingFrame,
+.embeddedMessagingConversationButton,
+[class*="embeddedMessaging"] {
+    margin: revert !important;
+    padding: revert !important;
+    box-sizing: content-box !important;
+}
+
+.embedded-messaging {
+    position: fixed !important;
+    bottom: 0 !important;
+    right: 0 !important;
+    width: auto !important;
+    height: auto !important;
+    z-index: 999999 !important;
+    overflow: visible !important;
+}
+
+/* ── LWR full-width, zero-gap layout overrides ──────────────────────────────
+ * LWR content regions add padding and max-width. Override globally here.
+ * Attribute selectors catch LWR's dynamically generated class names.
+ */
+[class*="content-layout"],
+[class*="contentRegion"],
+[class*="mainContentRegion"],
+[class*="content-wrapper"],
+[class*="outerContainer"],
+[class*="innerContainer"],
+[class*="slds-container"],
+[class*="comm-content"],
+[class*="dxp-content"],
+[class*="templateContainer"],
+[class*="themeLayout"],
+[class*="theme-layout"] {
+    max-width: 100% !important;
+    width: 100% !important;
+    padding: 0 !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    border-left: none !important;
+    border-right: none !important;
+    gap: 0 !important;
+}
+
+/* LWR custom element wrappers */
+dxp_template_lwr-content-layout,
+dxp_template_lwr-1t-full-width,
+community_layout-section,
+community_layout-section > div,
+community_layout-full-column,
+community_layout-full-column > div,
+webruntimedesign-component-wrapper,
+webruntimedesign-component-wrapper > div {
+    max-width: 100% !important;
+    width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    gap: 0 !important;
+}
+
+/* Override SLDS grid constraints */
+.slds-grid,
+.slds-col,
+.slds-container_x-large,
+.slds-container_large,
+.slds-container_medium {
+    max-width: 100% !important;
+    padding: 0 !important;
+}
+
+/* Zero vertical spacing between components in content region */
+community_layout-section,
+community_layout-full-column,
+[class*="contentRegion"],
+[class*="content-layout"] {
+    row-gap: 0 !important;
+}
+
+/* Remove margin/padding from individual component slot wrappers */
+webruntimedesign-component-wrapper {
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+}
+
+/* Frame layout body — remove top/bottom padding */
+[class*="frameBody"],
+[class*="frame-body"],
+[class*="body-container"] {
+    padding: 0 !important;
+    margin: 0 !important;
+    gap: 0 !important;
+}

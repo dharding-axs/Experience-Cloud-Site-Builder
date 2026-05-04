@@ -1,0 +1,134 @@
+/* Replace {{prefix}}- class prefix with your prefix
+   Replace brand colors: #304CB2 (primary), #FFBF27 (accent/gold), #ffffff (card bg) */
+
+:host {
+    display: block;
+}
+
+* {
+    box-sizing: border-box !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.{{prefix}}-hero {
+    padding: 32px 42px 32px !important;
+    background: #ffffff !important;
+}
+
+.{{prefix}}-hero-inner {
+    max-width: 1280px !important;
+    margin: 0 auto !important;
+}
+
+.{{prefix}}-hero-title {
+    font-size: 32px !important;
+    font-weight: 700 !important;
+    color: #304CB2 !important;
+    margin: 0 0 4px !important;
+    line-height: 1.2 !important;
+}
+
+.{{prefix}}-hero-subtitle {
+    font-size: 16px !important;
+    color: #636363 !important;
+    margin: 0 0 24px !important;
+}
+
+.{{prefix}}-topic-cards {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 16px !important;
+}
+
+.{{prefix}}-topic-card {
+    display: block !important;
+    text-decoration: none !important;
+    color: inherit !important;
+    background: #fff !important;
+    border: none !important;
+    border-radius: 8px !important;
+    overflow: hidden !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12), 0 0 1px rgba(0, 0, 0, 0.08) !important;
+    transition: box-shadow 0.2s !important;
+}
+
+.{{prefix}}-topic-card:hover {
+    background: #304CB2 !important;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18), 0 0 1px rgba(0, 0, 0, 0.08) !important;
+}
+
+.{{prefix}}-topic-card:hover .{{prefix}}-card-title {
+    color: #ffffff !important;
+}
+
+.{{prefix}}-topic-card:hover .{{prefix}}-card-desc {
+    color: rgba(255, 255, 255, 0.85) !important;
+}
+
+.{{prefix}}-topic-card:hover .{{prefix}}-card-arrow svg {
+    stroke: #FFBF27 !important;
+}
+
+.{{prefix}}-card-top-border {
+    height: 4px !important;
+    background: linear-gradient(90deg, #FFBF27 0%, #E8A100 100%) !important;
+}
+
+.{{prefix}}-card-content {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 24px !important;
+    min-height: 112px !important;
+}
+
+.{{prefix}}-card-text {
+    flex: 1 !important;
+    padding-right: 12px !important;
+}
+
+.{{prefix}}-card-title {
+    font-size: 18px !important;
+    font-weight: 700 !important;
+    color: #304CB2 !important;
+    margin: 0 0 4px !important;
+    line-height: 1.3 !important;
+}
+
+.{{prefix}}-card-desc {
+    font-size: 14px !important;
+    color: #636363 !important;
+    margin: 0 !important;
+    line-height: 1.4 !important;
+}
+
+.{{prefix}}-card-arrow {
+    flex-shrink: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+}
+
+@media (max-width: 768px) {
+    .{{prefix}}-topic-cards {
+        grid-template-columns: 1fr !important;
+    }
+
+    .{{prefix}}-hero-title {
+        font-size: 26px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .{{prefix}}-hero {
+        padding: 20px 16px 24px !important;
+    }
+
+    .{{prefix}}-hero-title {
+        font-size: 22px !important;
+    }
+
+    .{{prefix}}-card-content {
+        padding: 14px 16px !important;
+    }
+}

@@ -1,0 +1,108 @@
+<template>
+    <section class={sectionClass}>
+        <div class="{{prefix}}-search-inner">
+            <template lwc:if={chatActive}>
+                <div class="{{prefix}}-chat-panel">
+                    <div class="{{prefix}}-chat-header">
+                        <span class="{{prefix}}-chat-agent-name">Ask me anything</span>
+                        <div class="{{prefix}}-chat-header-actions">
+                            <button class="{{prefix}}-chat-login-btn" onclick={openContextPanel} aria-label="Sign in">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2">
+                                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                    <circle cx="12" cy="7" r="4"></circle>
+                                </svg>
+                            </button>
+                            <button class="{{prefix}}-chat-close" onclick={handleCloseChat} aria-label="Close chat">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5">
+                                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div class={chatBodyClass}>
+                        <div class="{{prefix}}-ecv2-container"></div>
+                        <div class={contextPanelClass}>
+                            <div class="{{prefix}}-context-panel-inner">
+                                <button class="{{prefix}}-context-panel-close" onclick={handleContextClose} aria-label="Close panel">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2.5">
+                                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                                    </svg>
+                                </button>
+                                <div class="{{prefix}}-context-panel-header">
+                                    <h3 class="{{prefix}}-context-panel-title">Rapid Rewards Login</h3>
+                                    <p class="{{prefix}}-context-panel-subtitle">Sign in to access your account details</p>
+                                </div>
+                                <div class="{{prefix}}-context-panel-body">
+                                    <div class="{{prefix}}-context-field">
+                                        <label class="{{prefix}}-context-label">Username or Rapid Rewards #</label>
+                                        <input type="text"
+                                               class="{{prefix}}-context-input"
+                                               placeholder="Enter username"
+                                               data-field="username"
+                                               oninput={handleLoginInput} />
+                                    </div>
+                                    <div class="{{prefix}}-context-field">
+                                        <label class="{{prefix}}-context-label">Password</label>
+                                        <input type="password"
+                                               class="{{prefix}}-context-input"
+                                               placeholder="Enter password"
+                                               data-field="password"
+                                               oninput={handleLoginInput}
+                                               onkeyup={handleLoginKeyUp} />
+                                    </div>
+                                    <template lwc:if={loginError}>
+                                        <p class="{{prefix}}-context-error">{loginError}</p>
+                                    </template>
+                                    <button class="{{prefix}}-context-submit" onclick={handleLoginSubmit} disabled={loginSubmitting}>
+                                        <template lwc:if={loginSubmitting}>
+                                            Signing in...
+                                        </template>
+                                        <template lwc:else>
+                                            Sign In
+                                        </template>
+                                    </button>
+                                    <span class="{{prefix}}-context-forgot">Forgot password?</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </template>
+
+            <template lwc:if={showSearchBox}>
+                <div class="{{prefix}}-search-box">
+                    <h2 class="{{prefix}}-search-title">Ask me anything</h2>
+                    <p class="{{prefix}}-search-subtitle">Real answers for your trip before, during, or after takeoff.</p>
+                    <div class="{{prefix}}-search-input-wrap">
+                        <div class="{{prefix}}-input-inner">
+                            <input type="text"
+                                   class="{{prefix}}-search-input"
+                                   placeholder="Ask me anything or log in for personalized help"
+                                   value={searchTerm}
+                                   oninput={handleInput}
+                                   onkeyup={handleKeyUp}
+                                   />
+                            <button class="{{prefix}}-icon-btn {{prefix}}-hide-mobile" aria-label="Voice chat">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                                    <rect x="3" y="10" width="2" height="4" rx="1" fill="#304CB2"></rect>
+                                    <rect x="7" y="7" width="2" height="10" rx="1" fill="#304CB2"></rect>
+                                    <rect x="11" y="4" width="2" height="16" rx="1" fill="#304CB2"></rect>
+                                    <rect x="15" y="7" width="2" height="10" rx="1" fill="#304CB2"></rect>
+                                    <rect x="19" y="10" width="2" height="4" rx="1" fill="#304CB2"></rect>
+                                </svg>
+                            </button>
+                        </div>
+                        <button class="{{prefix}}-send-btn" onclick={handleSubmit} aria-label="Send">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#304CB2" stroke-width="2">
+                                <line x1="22" y1="2" x2="11" y2="13"></line>
+                                <polygon points="22 2 15 22 11 13 2 9 22 2" fill="none"></polygon>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </template>
+        </div>
+    </section>
+</template>

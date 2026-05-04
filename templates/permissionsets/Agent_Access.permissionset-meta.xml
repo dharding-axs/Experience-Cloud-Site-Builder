@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Grants access to the Agentforce KnowledgeSearch Invocable Apex and Knowledge articles.
+     REPLACE: {{Prefix}}KnowledgeSearch → your Apex class name.
+     Used by the Agentforce agent to search Knowledge via the InvocableMethod. -->
+<PermissionSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>Grants access to the KnowledgeSearch Apex class and Knowledge articles for the Agentforce agent.</description>
+    <hasActivationRequired>false</hasActivationRequired>
+    <label>Agent Knowledge Access</label>
+    <classAccesses>
+        <apexClass>{{Prefix}}KnowledgeSearch</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <objectPermissions>
+        <allowRead>true</allowRead>
+        <object>Knowledge__kav</object>
+    </objectPermissions>
+</PermissionSet>

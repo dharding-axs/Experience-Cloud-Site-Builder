@@ -1,0 +1,160 @@
+<template>
+    <section class="{{prefix}}-hero-c">
+        <div class="{{prefix}}-hero-c-inner">
+            <div class="{{prefix}}-hero-c-content">
+                <h1 class="{{prefix}}-hero-c-title">Need help? Just ask.</h1>
+                <p class="{{prefix}}-hero-c-subtitle">Our AI assistant knows {{ClientName}} inside and out — from booking and check-in to baggage and Loyalty Program.</p>
+                <button class="{{prefix}}-hero-c-cta" onclick={openFullscreen}>
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                    </svg>
+                    Ask {{ClientName}} Anything
+                </button>
+            </div>
+            <div class="{{prefix}}-hero-c-visual">
+                <div class="{{prefix}}-hero-c-mockup">
+                    <div class="{{prefix}}-mockup-header">
+                        <span class="{{prefix}}-mockup-dot"></span>
+                        <span class="{{prefix}}-mockup-dot"></span>
+                        <span class="{{prefix}}-mockup-dot"></span>
+                    </div>
+                    <div class="{{prefix}}-mockup-body">
+                        <div class="{{prefix}}-mockup-msg {{prefix}}-mockup-agent">Hi! How can I help you today?</div>
+                        <div class="{{prefix}}-mockup-msg {{prefix}}-mockup-user">I need to change my flight</div>
+                        <div class="{{prefix}}-mockup-msg {{prefix}}-mockup-agent">No problem! {{ClientName}} never charges change fees. Let me pull up your booking.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <template lwc:if={isFullscreenOpen}>
+        <div class="{{prefix}}-fs-overlay">
+            <div class="{{prefix}}-fs-header">
+                <span class="{{prefix}}-fs-title">Ask me anything</span>
+                <button class="{{prefix}}-fs-close" onclick={closeFullscreen} aria-label="Close assistant">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+
+            <div class={chatBodyClass}>
+                <div class="{{prefix}}-fs-messages">
+                    <template for:each={messages} for:item="msg">
+                        <div key={msg.id} class={msg.containerClass}>
+                            <div class={msg.bubbleClass}>
+                                {msg.text}
+                            </div>
+                            <template lwc:if={msg.hasPills}>
+                                <div class="{{prefix}}-fs-inline-pills">
+                                    <template for:each={msg.pills} for:item="pill">
+                                        <button key={pill.id}
+                                                class="{{prefix}}-fs-pill"
+                                                onclick={handleInlinePillClick}
+                                                data-action={pill.action}
+                                                data-query={pill.query}
+                                                data-msg-id={msg.id}>
+                                            {pill.label}
+                                        </button>
+                                    </template>
+                                </div>
+                            </template>
+                            <span class="{{prefix}}-fs-msg-time">{msg.time}</span>
+                        </div>
+                    </template>
+
+                    <template lwc:if={isTyping}>
+                        <div class="{{prefix}}-fs-msg-row {{prefix}}-fs-msg-agent">
+                            <div class="{{prefix}}-fs-bubble {{prefix}}-fs-bubble-agent {{prefix}}-fs-typing">
+                                <span class="{{prefix}}-fs-typing-dot"></span>
+                                <span class="{{prefix}}-fs-typing-dot"></span>
+                                <span class="{{prefix}}-fs-typing-dot"></span>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+
+                <div class={loginPanelClass}>
+                    <div class="{{prefix}}-fs-login-panel-inner">
+                        <button class="{{prefix}}-fs-login-panel-close" onclick={handleLoginClose} aria-label="Close login">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2.5">
+                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                            </svg>
+                        </button>
+                        <div class="{{prefix}}-fs-login-panel-header">
+                            <h3 class="{{prefix}}-fs-login-panel-title">Loyalty Program Login</h3>
+                            <p class="{{prefix}}-fs-login-panel-subtitle">Sign in to access your account details</p>
+                        </div>
+                        <div class="{{prefix}}-fs-login-panel-body">
+                            <div class="{{prefix}}-fs-login-field">
+                                <label class="{{prefix}}-fs-login-label">Username or Loyalty Program #</label>
+                                <input type="text"
+                                       class="{{prefix}}-fs-login-input"
+                                       placeholder="Enter username"
+                                       data-field="username"
+                                       oninput={handleLoginInput} />
+                            </div>
+                            <div class="{{prefix}}-fs-login-field">
+                                <label class="{{prefix}}-fs-login-label">Password</label>
+                                <input type="password"
+                                       class="{{prefix}}-fs-login-input"
+                                       placeholder="Enter password"
+                                       data-field="password"
+                                       oninput={handleLoginInput}
+                                       onkeyup={handleLoginKeyUp} />
+                            </div>
+                            <template lwc:if={loginError}>
+                                <p class="{{prefix}}-fs-login-error">{loginError}</p>
+                            </template>
+                            <button class="{{prefix}}-fs-login-submit" onclick={handleLoginSubmit} disabled={loginSubmitting}>
+                                <template lwc:if={loginSubmitting}>
+                                    Signing in...
+                                </template>
+                                <template lwc:else>
+                                    Sign In
+                                </template>
+                            </button>
+                            <span class="{{prefix}}-fs-login-forgot">Forgot password?</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="{{prefix}}-fs-input-area">
+                <div class="{{prefix}}-fs-input-wrap">
+                    <div class="{{prefix}}-fs-input-inner">
+                        <input type="text"
+                               class="{{prefix}}-fs-input"
+                               placeholder="Ask me anything..."
+                               value={chatInput}
+                               oninput={handleChatInput}
+                               onkeyup={handleChatKeyUp} />
+                    </div>
+                    <button class="{{prefix}}-fs-send" onclick={handleSendMessage} aria-label="Send">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#304CB2" stroke-width="2">
+                            <line x1="22" y1="2" x2="11" y2="13"></line>
+                            <polygon points="22 2 15 22 11 13 2 9 22 2" fill="none"></polygon>
+                        </svg>
+                    </button>
+                </div>
+                <template lwc:if={showContextPills}>
+                    <div class="{{prefix}}-fs-suggestions">
+                        <template for:each={activePills} for:item="pill">
+                            <button key={pill.id}
+                                    class="{{prefix}}-fs-pill"
+                                    onclick={handlePillClick}
+                                    data-query={pill.query}
+                                    data-id={pill.id}
+                                    data-topic={pill.topic}>
+                                {pill.label}
+                            </button>
+                        </template>
+                    </div>
+                </template>
+            </div>
+        </div>
+    </template>
+</template>

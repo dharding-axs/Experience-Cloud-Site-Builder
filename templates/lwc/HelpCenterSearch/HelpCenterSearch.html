@@ -1,0 +1,14 @@
+<!-- Concept A: Basic search bar (no chat). Replace {{prefix}}- with your prefix. -->
+<template>
+    <section class="{{prefix}}-search-section">
+        <div class="{{prefix}}-search-inner">
+            <div class="{{prefix}}-search-box">
+                <h2 class="{{prefix}}-search-title">Search our help options and FAQs</h2>
+                <div class="{{prefix}}-search-input-wrap">
+                    <input type="text" class="{{prefix}}-search-input" placeholder="Type to search" value={searchTerm} onchange={handleSearchChange} onkeyup={handleKeyUp} />
+                    <button class="{{prefix}}-search-button" onclick={handleSearch}>Search</button>
+                </div>
+            </div>
+        </div>
+    </section>
+</template>

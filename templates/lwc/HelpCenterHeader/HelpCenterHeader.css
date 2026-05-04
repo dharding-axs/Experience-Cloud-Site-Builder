@@ -1,0 +1,254 @@
+/* Replace {{prefix}}- class prefix throughout with your prefix (e.g. acme-)
+   Replace brand colors: #304CB2 (primary blue), #1B2D7B (dark navy), #FFBF27 (gold) */
+
+:host {
+    display: block !important;
+    /* Full-width bleed: adjust -42px/-84px to match your LWR content region padding */
+    margin-left: -42px !important;
+    margin-right: -42px !important;
+    width: calc(100% + 84px) !important;
+    box-sizing: border-box !important;
+}
+
+.{{prefix}}-header {
+    background: linear-gradient(90deg, #304CB2 0%, #1B2D7B 100%) !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.{{prefix}}-header * {
+    box-sizing: border-box !important;
+}
+
+.{{prefix}}-utility-bar {
+    padding: 0 42px !important;
+}
+
+.{{prefix}}-utility-inner {
+    max-width: 1280px !important;
+    margin: 0 auto !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    height: 28px !important;
+}
+
+.{{prefix}}-lang-link {
+    color: #ffffff !important;
+    text-decoration: none !important;
+    font-size: 12px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+}
+
+.{{prefix}}-lang-link:hover {
+    text-decoration: underline !important;
+    color: #ffffff !important;
+}
+
+.{{prefix}}-globe-icon {
+    display: flex !important;
+    align-items: center !important;
+}
+
+.{{prefix}}-nav-bar {
+    padding: 0 42px !important;
+}
+
+.{{prefix}}-nav-inner {
+    max-width: 1280px !important;
+    margin: 0 auto !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    height: 50px !important;
+}
+
+.{{prefix}}-logo-img {
+    height: 28px !important;
+    width: auto !important;
+}
+
+.{{prefix}}-nav {
+    flex: 1 !important;
+    display: flex !important;
+    justify-content: flex-end !important;
+    margin-right: 12px !important;
+}
+
+.{{prefix}}-nav-list {
+    display: flex !important;
+    align-items: center !important;
+    list-style: none !important;
+    gap: 4px !important;
+}
+
+.{{prefix}}-nav-list li a {
+    color: #ffffff !important;
+    text-decoration: none !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.5px !important;
+    padding: 4px 6px !important;
+}
+
+.{{prefix}}-nav-list li a:hover {
+    text-decoration: underline !important;
+    color: #ffffff !important;
+}
+
+.{{prefix}}-nav-separator {
+    width: 1px !important;
+    height: 16px !important;
+    background: rgba(255, 255, 255, 0.4) !important;
+    margin: 0 8px !important;
+}
+
+.{{prefix}}-nav-actions {
+    display: flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+    flex-shrink: 0 !important;
+}
+
+.{{prefix}}-search-btn {
+    background: none !important;
+    border: none !important;
+    cursor: pointer !important;
+    padding: 4px !important;
+    display: flex !important;
+    align-items: center !important;
+    flex-shrink: 0 !important;
+    box-shadow: none !important;
+}
+
+.{{prefix}}-search-btn:focus {
+    box-shadow: none !important;
+    outline: 2px solid rgba(255, 255, 255, 0.5) !important;
+    outline-offset: 2px !important;
+}
+
+/* Hamburger — hidden on desktop */
+.{{prefix}}-hamburger {
+    display: none !important;
+    background: none !important;
+    border: none !important;
+    cursor: pointer !important;
+    padding: 6px !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    gap: 5px !important;
+    box-shadow: none !important;
+    flex-shrink: 0 !important;
+}
+
+.{{prefix}}-hamburger-line {
+    display: block !important;
+    width: 20px !important;
+    height: 2px !important;
+    background: #ffffff !important;
+    border-radius: 1px !important;
+    transition: transform 0.3s, opacity 0.3s !important;
+}
+
+.{{prefix}}-hamburger-open .{{prefix}}-hamburger-line:first-child {
+    transform: translateY(7px) rotate(45deg) !important;
+}
+
+.{{prefix}}-hamburger-open .{{prefix}}-hamburger-line:nth-child(2) {
+    opacity: 0 !important;
+}
+
+.{{prefix}}-hamburger-open .{{prefix}}-hamburger-line:last-child {
+    transform: translateY(-7px) rotate(-45deg) !important;
+}
+
+/* Mobile menu — hidden on desktop */
+.{{prefix}}-mobile-menu {
+    display: none !important;
+}
+
+.{{prefix}}-mobile-nav-list {
+    list-style: none !important;
+}
+
+@media (max-width: 768px) {
+    /* CRITICAL: reset the bleed on mobile — negative margins clip content on narrow viewports */
+    :host {
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        width: 100% !important;
+    }
+
+    .{{prefix}}-utility-bar {
+        padding: 0 16px !important;
+    }
+
+    .{{prefix}}-nav-bar {
+        padding: 0 16px !important;
+    }
+
+    .{{prefix}}-nav-list {
+        display: none !important;
+    }
+
+    .{{prefix}}-nav {
+        display: none !important;
+    }
+
+    .{{prefix}}-nav-inner {
+        height: 44px !important;
+    }
+
+    .{{prefix}}-hamburger {
+        display: flex !important;
+    }
+
+    .{{prefix}}-mobile-menu {
+        display: block !important;
+        max-height: 0 !important;
+        overflow: hidden !important;
+        transition: max-height 0.3s ease !important;
+        background: #1B2D7B !important;
+    }
+
+    .{{prefix}}-mobile-menu-open {
+        max-height: 500px !important;
+    }
+
+    .{{prefix}}-mobile-nav-list {
+        padding: 8px 16px 16px !important;
+    }
+
+    .{{prefix}}-mobile-nav-list li {
+        list-style: none !important;
+    }
+
+    .{{prefix}}-mobile-nav-list li a {
+        display: block !important;
+        color: #ffffff !important;
+        text-decoration: none !important;
+        font-size: 14px !important;
+        font-weight: 700 !important;
+        letter-spacing: 0.5px !important;
+        padding: 10px 0 !important;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.15) !important;
+    }
+
+    .{{prefix}}-mobile-nav-list li:last-child a {
+        border-bottom: none !important;
+    }
+
+    .{{prefix}}-mobile-nav-list li a:hover {
+        color: #ffffff !important;
+        text-decoration: underline !important;
+    }
+
+    .{{prefix}}-mobile-separator {
+        height: 0 !important;
+        margin: 4px 0 !important;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.3) !important;
+    }
+}
