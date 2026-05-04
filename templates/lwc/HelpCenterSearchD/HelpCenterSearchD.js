@@ -34,6 +34,7 @@ export default class {{Prefix}}HelpCenterSearchD extends LightningElement {
     _fabPolling = null;
     _hideObserver = null;
     _pollTimer = null;
+    _frameObserver = null;
     _chatClosedAt = 0;
 
     connectedCallback() {
@@ -181,14 +182,12 @@ export default class {{Prefix}}HelpCenterSearchD extends LightningElement {
         // Hide the FAB immediately
         this._suppressFab();
 
-        // Park off-screen with real dimensions so iframe renders properly
-        ecv2.style.cssText = 'display:block !important; position:fixed !important; ' +
-            'left:-9999px !important; top:0 !important; ' +
-            'width:400px !important; height:700px !important; ' +
-            'opacity:0 !important; pointer-events:none !important;';
+        // Keep ECV2 in its normal position but invisible — parking it off-screen
+        // prevents ECV2 from rendering iframe content. Opacity:0 hides the
+        // bottom-right widget while the animation completes.
+        ecv2.style.setProperty('opacity', '0', 'important');
+        ecv2.style.setProperty('pointer-events', 'none', 'important');
 
-        // launchChat() is the correct API — available now that bootstrap loads
-        // via head markup rather than the Experience Builder component
         this._launchChat();
 
         // Poll until iframe AND panel container are both in the DOM
@@ -208,7 +207,10 @@ export default class {{Prefix}}HelpCenterSearchD extends LightningElement {
                 clearInterval(this._pollTimer);
                 this._pollTimer = null;
                 this._suppressFab();
-                this._revealAndPosition(ecv2, message);
+                // Wait for ECV2's opening animation to finish writing its own
+                // bottom-right coordinates before we override them.
+                // eslint-disable-next-line @lwc/lwc/no-async-operation
+                setTimeout(() => this._revealAndPosition(ecv2, message), 700);
             }
         }, 100);
     }
@@ -253,10 +255,11 @@ export default class {{Prefix}}HelpCenterSearchD extends LightningElement {
     }
 
     _revealAndPosition(ecv2, message) {
-        // Make container visible
-        ecv2.style.cssText = 'display:block !important; visibility:visible !important;';
         this._suppressFab();
         this.positionEcv2InPanel();
+        // Clear the opacity hold so the repositioned iframe becomes visible
+        ecv2.style.removeProperty('opacity');
+        ecv2.style.removeProperty('pointer-events');
         if (message) this._waitForInputReady(ecv2, message, 0);
     }
 
@@ -265,7 +268,6 @@ export default class {{Prefix}}HelpCenterSearchD extends LightningElement {
     positionEcv2InPanel() {
         const container = this.template.querySelector('.swa-ecv2-container');
         if (!container) return;
-        const rect = container.getBoundingClientRect();
         const ecv2 = document.querySelector('.embedded-messaging');
         if (!ecv2) return;
 
@@ -274,22 +276,35 @@ export default class {{Prefix}}HelpCenterSearchD extends LightningElement {
         const chatFrame = ecv2.querySelector(
             '.embeddedMessagingFrame, [class*="embeddedMessagingFrame"], iframe'
         );
-        if (chatFrame) {
-            chatFrame.style.cssText = `
-                position: fixed !important;
-                top: ${rect.top}px !important;
-                left: ${rect.left}px !important;
-                width: ${rect.width}px !important;
-                height: ${rect.height}px !important;
-                bottom: auto !important;
-                right: auto !important;
-                max-height: none !important;
-                border-radius: 0 !important;
-                box-shadow: none !important;
-                z-index: 200001 !important;
-                visibility: visible !important;
-            `;
-        }
+        if (!chatFrame) return;
+
+        const applyPosition = () => {
+            const r = container.getBoundingClientRect();
+            chatFrame.style.setProperty('position', 'fixed', 'important');
+            chatFrame.style.setProperty('top', `${r.top}px`, 'important');
+            chatFrame.style.setProperty('left', `${r.left}px`, 'important');
+            chatFrame.style.setProperty('width', `${r.width}px`, 'important');
+            chatFrame.style.setProperty('height', `${r.height}px`, 'important');
+            chatFrame.style.setProperty('bottom', 'auto', 'important');
+            chatFrame.style.setProperty('right', 'auto', 'important');
+            chatFrame.style.setProperty('max-height', 'none', 'important');
+            chatFrame.style.setProperty('border-radius', '0', 'important');
+            chatFrame.style.setProperty('box-shadow', 'none', 'important');
+            chatFrame.style.setProperty('z-index', '200001', 'important');
+            chatFrame.style.setProperty('visibility', 'visible', 'important');
+        };
+
+        applyPosition();
+
+        // ECV2's bootstrap animation rewrites the frame's style after launchChat().
+        // Watch for that and immediately re-apply our coordinates.
+        if (this._frameObserver) this._frameObserver.disconnect();
+        this._frameObserver = new MutationObserver(() => {
+            if (chatFrame.style.position !== 'fixed' || chatFrame.style.bottom !== 'auto') {
+                applyPosition();
+            }
+        });
+        this._frameObserver.observe(chatFrame, { attributes: true, attributeFilter: ['style'] });
 
         this._hideEcv2Chrome(ecv2, 0);
         ecv2.style.visibility = 'visible';
@@ -308,10 +323,10 @@ export default class {{Prefix}}HelpCenterSearchD extends LightningElement {
             '.embeddedMessagingFrame, [class*="embeddedMessagingFrame"], iframe'
         );
         if (chatFrame) {
-            chatFrame.style.top = `${rect.top}px`;
-            chatFrame.style.left = `${rect.left}px`;
-            chatFrame.style.width = `${rect.width}px`;
-            chatFrame.style.height = `${rect.height}px`;
+            chatFrame.style.setProperty('top', `${rect.top}px`, 'important');
+            chatFrame.style.setProperty('left', `${rect.left}px`, 'important');
+            chatFrame.style.setProperty('width', `${rect.width}px`, 'important');
+            chatFrame.style.setProperty('height', `${rect.height}px`, 'important');
         }
     }
 
@@ -444,6 +459,7 @@ export default class {{Prefix}}HelpCenterSearchD extends LightningElement {
 
     handleCloseChat() {
         if (this._resizeHandler) window.removeEventListener('resize', this._resizeHandler);
+        if (this._frameObserver) { this._frameObserver.disconnect(); this._frameObserver = null; }
         if (this._pollTimer) { clearInterval(this._pollTimer); this._pollTimer = null; }
 
         // eslint-disable-next-line no-undef
@@ -457,9 +473,8 @@ export default class {{Prefix}}HelpCenterSearchD extends LightningElement {
 
         const ecv2 = document.querySelector('.embedded-messaging');
         if (ecv2) {
-            ecv2.style.cssText = 'display:block !important; position:fixed !important; ' +
-                'left:-9999px !important; top:0 !important; ' +
-                'opacity:0 !important; pointer-events:none !important;';
+            ecv2.style.setProperty('opacity', '0', 'important');
+            ecv2.style.setProperty('pointer-events', 'none', 'important');
         }
 
         this._clearEcv2Session();
@@ -542,6 +557,7 @@ export default class {{Prefix}}HelpCenterSearchD extends LightningElement {
 
     disconnectedCallback() {
         if (this._resizeHandler) window.removeEventListener('resize', this._resizeHandler);
+        if (this._frameObserver) this._frameObserver.disconnect();
         if (this._fabObserver) this._fabObserver.disconnect();
         if (this._hideObserver) this._hideObserver.disconnect();
         if (this._fabPolling) clearInterval(this._fabPolling);

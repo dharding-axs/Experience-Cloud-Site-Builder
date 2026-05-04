@@ -2,6 +2,107 @@
 
 Production-ready reference templates extracted from the Southwest Airlines AMA Help Center build. Use as the starting point for any new LWR Help Center site with Agentforce chat integration.
 
+## Starting a New Engagement
+
+Use this checklist every time you spin up a new Experience Cloud site from these templates.
+
+### Step 1 — Copy the templates into your SFDX project
+
+```bash
+# From your new SFDX project root
+cp -r /path/to/Experience-Cloud-Site-Builder/templates/lwc/*            force-app/main/default/lwc/
+cp -r /path/to/Experience-Cloud-Site-Builder/templates/classes/*         force-app/main/default/classes/
+cp -r /path/to/Experience-Cloud-Site-Builder/templates/staticresources/* force-app/main/default/staticresources/
+cp -r /path/to/Experience-Cloud-Site-Builder/templates/permissionsets/*  force-app/main/default/permissionsets/
+```
+
+### Step 2 — Set your prefix and client name
+
+Pick a short lowercase prefix (e.g. `acme`, `snj`, `jet`) and run a global find-and-replace across `force-app/main/default/`:
+
+| Find | Replace with | Used in |
+|---|---|---|
+| `{{prefix}}` | your lowercase prefix (e.g. `acme`) | CSS class names, static resource imports, Knowledge URL filter |
+| `{{Prefix}}` | PascalCase prefix (e.g. `Acme`) | Apex class names, LWC JS class names |
+| `{{PREFIX}}` | Uppercase prefix (e.g. `ACME`) | masterLabel values |
+| `{{ClientName}}` | Client display name (e.g. `Acme Corp`) | Labels, footer copyright, login panel title |
+
+```bash
+# macOS find-and-replace example (adjust prefix values):
+LOWER=acme; PASCAL=Acme; UPPER=ACME; CLIENT="Acme Corp"
+find force-app -type f \( -name "*.js" -o -name "*.html" -o -name "*.css" -o -name "*.xml" -o -name "*.cls" \) \
+  -exec sed -i '' \
+    -e "s/{{prefix}}/$LOWER/g" \
+    -e "s/{{Prefix}}/$PASCAL/g" \
+    -e "s/{{PREFIX}}/$UPPER/g" \
+    -e "s/{{ClientName}}/$CLIENT/g" {} \;
+```
+
+### Step 3 — Rename files and folders to match your prefix
+
+```bash
+# LWC component folders and files must match (e.g. swaGlobalStyles → acmeGlobalStyles)
+cd force-app/main/default/lwc
+for dir in */; do mv "$dir" "${dir/HelpCenter/${PASCAL}HelpCenter}"; done
+# Then rename files within each folder to match the folder name
+```
+
+### Step 4 — Update the 5 customer-specific data sections
+
+These require client knowledge — they cannot be automated:
+
+1. **`{Prefix}HelpCenterSearchB.js` and `{Prefix}HelpCenterHeroC.js`** (Concepts B & C):
+   - `initialSuggestions[]` — one pill per agent topic (read the `.agent` file for topic names)
+   - `followUpPills{}` — 3–4 follow-ups per topic + a "Something else" `topic: 'switch'` pill
+   - `topicResponses{}` — fallback text per topic (shown if Knowledge search returns nothing)
+   - `followUpResponses{}` — per-pill detailed text (keyed to pill `id` values)
+   - `detectTopic()` — keyword patterns that route free-text input to the right topic
+
+2. **`{Prefix}AgentChatController.cls`** (Tier 2 Knowledge backend):
+   - `TOPIC_URLS` map — replace placeholder article UrlNames with real `{prefix}-*` UrlNames from the org
+   - `queryByKeywords` filter — confirm the `UrlName LIKE '{prefix}-%'` pattern matches the org's article naming
+
+3. **`{Prefix}HelpCenterHero.html`** — card titles and descriptions (4 top-level help categories)
+
+4. **`{Prefix}HelpCenterTopics.html`** — tile titles and descriptions (6 secondary topics)
+
+5. **`{Prefix}HelpCenterFooter.html`** — 4 link columns, social URLs, copyright year and company name
+
+### Step 5 — Choose your design concept(s)
+
+| Concept | Primary component | Best for |
+|---|---|---|
+| A (Baseline) | HelpCenterHero + HelpCenterSearch | Side-by-side comparison, quick standup |
+| B (Integrated) | HelpCenterSearchB | Search-first audiences, deflection demos |
+| C (Fullscreen) | HelpCenterHeroC | Executive demos, mobile-first experiences |
+| D (Native ECV2) | HelpCenterSearchD | Production — needs real ECV2 deployment already configured |
+
+For a stakeholder demo, build A + one of B/C/D on separate pages in the same site. Use Frame layout for all concept pages.
+
+### Step 6 — Deploy and wire up
+
+```bash
+# Deploy in order (Apex before LWC that calls it)
+sf project deploy start --source-dir force-app/main/default/classes      --target-org <alias>
+sf project deploy start --source-dir force-app/main/default/permissionsets --target-org <alias>
+sf project deploy start --source-dir force-app/main/default/staticresources --target-org <alias>
+sf project deploy start --source-dir force-app/main/default/lwc            --target-org <alias>
+```
+
+Then in Setup + Experience Builder (manual steps — see CLAUDE.md Phase 6):
+- Assign permission sets to both guest users
+- Set `areGuestUsersAllowed = true` in EmbeddedServiceConfig
+- Add CORS allowlist entry for site domain
+- Drag GlobalStyles onto every page
+- Drag concept components into Content region (not Theme layout)
+- Publish site
+
+### Step 7 — Verify in incognito
+
+Cached service workers and stale CSP headers mask fixes. Always test in a fresh incognito window after every deploy.
+
+---
+
 ## Placeholder Convention
 
 All templates use these placeholders. Find-and-replace across the `templates/` directory before deploying.
