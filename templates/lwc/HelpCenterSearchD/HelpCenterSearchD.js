@@ -182,9 +182,9 @@ export default class {{Prefix}}HelpCenterSearchD extends LightningElement {
         // Hide the FAB immediately
         this._suppressFab();
 
-        // Keep ECV2 in its normal position but invisible — parking it off-screen
-        // prevents ECV2 from rendering iframe content. Opacity:0 hides the
-        // bottom-right widget while the animation completes.
+        // launchChat() may replace the .embedded-messaging element entirely,
+        // making any pre-launch reference stale. Hide it now as a best-effort,
+        // then re-query fresh each poll tick to stay current.
         ecv2.style.setProperty('opacity', '0', 'important');
         ecv2.style.setProperty('pointer-events', 'none', 'important');
 
@@ -201,7 +201,13 @@ export default class {{Prefix}}HelpCenterSearchD extends LightningElement {
                 this._pollTimer = null;
                 return;
             }
-            const iframe = ecv2.querySelector('iframe');
+            // Re-query every tick — launchChat() may have replaced the element
+            const currentEcv2 = document.querySelector('.embedded-messaging');
+            if (!currentEcv2) return;
+            currentEcv2.style.setProperty('opacity', '0', 'important');
+            currentEcv2.style.setProperty('pointer-events', 'none', 'important');
+
+            const iframe = currentEcv2.querySelector('iframe');
             const container = this.template.querySelector('.swa-ecv2-container');
             if (iframe && container) {
                 clearInterval(this._pollTimer);
@@ -210,7 +216,7 @@ export default class {{Prefix}}HelpCenterSearchD extends LightningElement {
                 // Wait for ECV2's opening animation to finish writing its own
                 // bottom-right coordinates before we override them.
                 // eslint-disable-next-line @lwc/lwc/no-async-operation
-                setTimeout(() => this._revealAndPosition(ecv2, message), 700);
+                setTimeout(() => this._revealAndPosition(currentEcv2, message), 700);
             }
         }, 100);
     }
@@ -255,12 +261,13 @@ export default class {{Prefix}}HelpCenterSearchD extends LightningElement {
     }
 
     _revealAndPosition(ecv2, message) {
+        // Re-query in case launchChat() replaced the element since _openChat ran
+        const liveEcv2 = document.querySelector('.embedded-messaging') || ecv2;
         this._suppressFab();
         this.positionEcv2InPanel();
-        // Clear the opacity hold so the repositioned iframe becomes visible
-        ecv2.style.removeProperty('opacity');
-        ecv2.style.removeProperty('pointer-events');
-        if (message) this._waitForInputReady(ecv2, message, 0);
+        liveEcv2.style.removeProperty('opacity');
+        liveEcv2.style.removeProperty('pointer-events');
+        if (message) this._waitForInputReady(liveEcv2, message, 0);
     }
 
     // ─── Positioning ─────────────────────────────────────────────────────
@@ -296,15 +303,14 @@ export default class {{Prefix}}HelpCenterSearchD extends LightningElement {
 
         applyPosition();
 
-        // ECV2's bootstrap animation rewrites the frame's style after launchChat().
-        // Watch for that and immediately re-apply our coordinates.
+        // ECV2 positions via CSS class changes (e.g. adds 'maximized' to the iframe),
+        // not inline style writes. Watch 'class' so we re-apply whenever ECV2 transitions.
+        // We must NOT watch 'style' — applyPosition writes inline styles, which would
+        // trigger the observer again and create an infinite loop.
         if (this._frameObserver) this._frameObserver.disconnect();
-        this._frameObserver = new MutationObserver(() => {
-            if (chatFrame.style.position !== 'fixed' || chatFrame.style.bottom !== 'auto') {
-                applyPosition();
-            }
-        });
-        this._frameObserver.observe(chatFrame, { attributes: true, attributeFilter: ['style'] });
+        this._frameObserver = new MutationObserver(() => applyPosition());
+        this._frameObserver.observe(chatFrame, { attributes: true, attributeFilter: ['class'] });
+        this._frameObserver.observe(ecv2, { attributes: true, attributeFilter: ['class'] });
 
         this._hideEcv2Chrome(ecv2, 0);
         ecv2.style.visibility = 'visible';
