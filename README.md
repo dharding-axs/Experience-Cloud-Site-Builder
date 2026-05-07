@@ -30,23 +30,43 @@ A complete, battle-tested toolkit for going from zero to a deployed, branded Exp
 
 ## Quick Start
 
-### Using the Skill
-```bash
-# In any Salesforce project directory, Claude Code will invoke automatically when you ask to:
-# "Build an Experience Cloud site with an embedded Agentforce agent"
-# "Generate LWC components for a digital experience"
-# "Create a branded help center with ECV2 inline mode"
-```
+### Trigger Utterance
 
-The skill runs an 8-phase guided wizard:
-1. Brand extraction (URL / screenshot / manual)
-2. Agent integration mode selection (FAB / Inline / Fullscreen)
-3. Agent generation (persona, topics, Knowledge)
-4. Messaging Channel + ESW Deployment setup
-5. Global CSS infrastructure
-6. LWC component generation
-7. Contextual panel generation (optional)
-8. Design iteration loop → verification → documentation
+With this repository open in Claude Code, start with:
+
+> **"Build me a branded Experience Cloud site with an embedded Agentforce agent"**
+
+Or any of these equivalents:
+- `"Create an Experience Cloud help center with ECV2 inline chat"`
+- `"I want to build an LWR site with a custom Agentforce agent wrapper"`
+- `"Scaffold an Experience Cloud site with an embedded agent using ECV2 inline mode"`
+
+Claude Code will automatically invoke the `experience-cloud-site-builder` skill and begin the guided wizard.
+
+### What to Have Ready Before You Start
+
+The wizard will ask for these — gathering them first speeds up Phase 0:
+
+| Input | Where to find it |
+|-------|-----------------|
+| Salesforce org alias | `sf org list` |
+| Brand URL or brand colors (hex) | Your customer's website or brand guide |
+| Logo file path | Local SVG or PNG |
+| Agent API name (if existing) | Setup → Agentforce Agents |
+| Site name and URL prefix | Decide in advance (e.g., "Help Center" / `helpcenter`) |
+
+### What the Wizard Does
+
+The skill runs an 8-phase guided wizard — no code is generated until you confirm the plan:
+
+1. **Phase 0** — Brand extraction + mode selection + plan confirmation
+2. **Phase 1** — Agent generation (persona, topics, Knowledge)
+3. **Phase 2** — Messaging Channel + ESW Deployment setup (guided manual + automated)
+4. **Phase 3** — Global CSS infrastructure
+5. **Phase 4** — LWC component generation
+6. **Phase 5** — Contextual panel generation (optional — e.g. a data collection wizard)
+7. **Phase 6** — Design iteration loop (~90s per cycle)
+8. **Phase 7/8** — Verification, testing, documentation
 
 ### Reproducing the Build Manually
 Follow `BUILD_PROCESS.md` — it's a complete 10-phase runbook with every CLI command, manual step, and verification query.
