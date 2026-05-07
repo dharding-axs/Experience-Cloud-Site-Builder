@@ -29,6 +29,51 @@ A complete, battle-tested toolkit for going from zero to a deployed, branded Exp
 - **postMessage bridge** — Bidirectional channel between LWC and iframe for utterance confirmation, topic detection, and menu actions.
 - **Split panel pattern** — CSS flex transition opens a contextual LWC panel alongside the chat when the agent detects a topic.
 
+## Prerequisites
+
+### CLI Tools
+
+| Tool | Required | Install |
+|------|----------|---------|
+| Salesforce CLI v2 (`sf`) | ✅ Required | `npm install -g @salesforce/cli` |
+| Git | ✅ Required | [git-scm.com](https://git-scm.com) |
+| Node.js 18+ | ✅ Required (for sf CLI) | [nodejs.org](https://nodejs.org) |
+
+Verify:
+```bash
+sf --version       # should show 2.x.x
+git --version
+```
+
+### Claude Code Skills
+
+This skill delegates to specialist skills during the build. Install these alongside `experience-cloud-site-builder` for the full wizard to work smoothly:
+
+| Skill | Used for | Required? |
+|-------|----------|-----------|
+| `sf-lwc` | Generating and editing LWC components (HTML, JS, CSS) | ✅ Required |
+| `generating-apex` | Generating `@InvocableMethod` and `@AuraEnabled` Apex classes | ✅ Required |
+| `developing-agentforce` | Writing and validating Agent Script `.agent` files | ✅ Required |
+| `sf-deploy` | Deploying metadata via `sf project deploy start` | ✅ Required |
+| `generating-permission-set` | Creating guest user permission set XML | ✅ Required |
+| `sf-diagram-mermaid` | Generating the architecture diagram in Phase 8 | Recommended |
+| `sf-metadata` | Querying org schema before scaffolding | Recommended |
+| `sf-soql` | Writing Knowledge article search queries | Recommended |
+| `gws-slides-creator` | Generating a presentation from the build (optional) | Optional |
+
+> **How delegation works:** The `experience-cloud-site-builder` skill orchestrates the build and calls specialist skills automatically at the right phase. You don't need to invoke them manually — they just need to be installed and available in your Claude Code environment.
+
+### Installing Skills
+
+Skills live in your Claude Code plugin or project `.claude/skills/` directory. To use this skill:
+
+1. Clone this repository into your project or Claude Code plugin directory
+2. Ensure the specialist skills above are installed in the same environment
+3. Open Claude Code in any Salesforce project directory
+4. Use the trigger utterance below
+
+---
+
 ## Quick Start
 
 ### Trigger Utterance
