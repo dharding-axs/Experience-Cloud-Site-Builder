@@ -819,3 +819,134 @@ force-app/main/default/
 24. **Wizard panel: no X button.** Force completion to step 3 so closing utterance fires and agent provides verification response. Save information is the only close trigger.
 25. **`_wizardJustClosed` guard (3s).** Prevents immediate re-open after wizard close while `swa-pet-wizard-trigger` postMessage might still be in flight.
 26. **Loading indicator on every open.** Set `_chatRevealed = false` and `_iframeReady = false` in `handleSubmit` — not just on first open. Both reopen and first open should show the loading state.
+
+---
+
+## Migrating to a New Org
+
+Use this when you want to deploy the site builder components to a new or different Salesforce org. This covers the LWCs, Apex, agent, permission sets, static resources, and CORS config — not a full org copy.
+
+### Step 1: Authenticate to the New Org
+
+```bash
+sf org login web --alias <new-alias>
+```
+
+### Step 2: Update Org-Specific Values in LWC
+
+These values are hardcoded to the source org and must be updated before deploying. Find them in `swaHelpCenterSearchD.js`:
+
+```bash
+# Find all org-specific references
+grep -n "orgId\|siteUrl\|scrt2Url\|deploymentApiName" \
+  force-app/main/default/lwc/swaHelpCenterSearchD/swaHelpCenterSearchD.js
+```
+
+Get the new values after creating the ESW Deployment in the new org (Step 5):
+
+| Value | How to get it |
+|-------|--------------|
+| `orgId` | `sf org display --target-org <new-alias>` → `Id` field |
+| `siteUrl` | Setup → Embedded Service Deployments → click deployment → copy ESW site URL |
+| `scrt2Url` | Same page — shown as "SCRT URL" |
+| `deploymentApiName` | `sf data query --query "SELECT DeveloperName FROM EmbeddedServiceConfig" --target-org <new-alias>` |
+
+Also update the CORS allowlist XML with the new site domain:
+```bash
+# force-app/main/default/corsWhitelistOrigins/<filename>.corsWhitelistOrigin-meta.xml
+# Change urlPattern to: https://<new-domain>.my.site.com
+```
+
+### Step 3: Deploy All Metadata
+
+```bash
+cd <your-project-directory>
+
+sf project deploy start \
+  --source-dir force-app/main/default/classes \
+  --source-dir force-app/main/default/lwc \
+  --source-dir force-app/main/default/staticresources \
+  --source-dir force-app/main/default/permissionsets \
+  --source-dir force-app/main/default/corsWhitelistOrigins \
+  --target-org <new-alias> \
+  --ignore-conflicts
+```
+
+### Step 4: Deploy and Activate the Agent
+
+```bash
+sf project deploy start \
+  --source-dir force-app/main/default/aiAuthoringBundles \
+  --target-org <new-alias> \
+  --ignore-conflicts
+
+sf agent publish authoring-bundle --json --api-name <AgentAPIName> --target-org <new-alias>
+sf agent activate --api-name <AgentAPIName> --target-org <new-alias>
+```
+
+Verify:
+```bash
+sf data query --query "SELECT Id, DeveloperName FROM BotDefinition" --target-org <new-alias>
+```
+
+### Step 5: Manual Steps in the New Org
+
+These cannot be automated — follow Phase 2 and Phase 5 in this document for full details.
+
+| Step | Location | Notes |
+|------|----------|-------|
+| Create Experience Cloud LWR site | Setup → Digital Experiences → New | "Build Your Own (LWR)" template |
+| Register Salesforce Sites domain | Setup → Sites → Register | Required before ESW Deployment wizard |
+| Create Messaging Channel | Setup → Messaging Settings → New Channel | Dedicated channel — never share default |
+| Create Embedded Service Deployment | Setup → Embedded Service Deployments → New | Must use Setup UI — metadata deploy won't provision backing site |
+| Publish ESW Deployment | Setup → Embedded Service Deployments → click → Publish | Required before chat activates |
+| Update Head Markup | Experience Builder → Administration → Advanced | Bootstrap script loader only, no `init()` |
+| Create pages, drag components, publish | Experience Builder | Frame layout, GlobalStyles in Theme Footer |
+
+### Step 6: Guest User Permissions
+
+```bash
+# Find both guest users in the new org
+sf data query \
+  --query "SELECT Id, Username FROM User WHERE Profile.UserLicense.Name = 'Guest User License' AND IsActive = true" \
+  --target-org <new-alias>
+
+# Get permission set IDs
+sf data query \
+  --query "SELECT Id, Name FROM PermissionSet WHERE Name LIKE '%Guest%' OR Name LIKE '%Messaging%'" \
+  --target-org <new-alias>
+
+# Assign to both guest users (EC site guest + ESW backing site guest)
+sf data create record --sobject PermissionSetAssignment \
+  --values "AssigneeId='<guest-user-id>' PermissionSetId='<perm-set-id>'" \
+  --target-org <new-alias>
+```
+
+Check `areGuestUsersAllowed`:
+```bash
+sf project retrieve start \
+  --metadata EmbeddedServiceConfig:<DeploymentName> \
+  --target-org <new-alias>
+# Edit XML if false, redeploy
+```
+
+### Step 7: Verify
+
+```bash
+# Bootstrap probe — run in browser console on the new site
+console.log('bootstrap:', typeof window.embeddedservice_bootstrap);
+console.log('displayMode:', window.embeddedservice_bootstrap?.settings?.displayMode);
+# Expected: 'object', 'inline'
+```
+
+Test in a new incognito window. The full test checklist is in Phase 10 of this document.
+
+### Common Issues After Migration
+
+**`orgId` mismatch** — Bootstrap init fails silently if `orgId` doesn't match the new org. Double-check with `sf org display`.
+
+**ESW backing site not created** — If the ESW Deployment was originally created via metadata deploy in the source org, the backing site was never provisioned. Recreate via Setup UI in the new org.
+
+**Guest permissions missing** — New org = new guest users. Old assignments don't carry over. Always re-run Step 6 after migrating.
+
+**Stale CORS** — If the new site domain is different, the old CORS entry won't match. Update the XML and redeploy.
