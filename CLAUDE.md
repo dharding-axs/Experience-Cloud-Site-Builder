@@ -2,7 +2,7 @@
 
 ## What This Repository Is
 
-A Claude Code skill and framework for building branded Salesforce Experience Cloud LWR sites with embedded Agentforce agents using ECV2 inline mode. Reference implementation: Southwest Airlines Help Center (Concept D).
+A Claude Code skill and framework for building branded Salesforce Experience Cloud LWR sites with embedded Agentforce agents using ECV2 inline mode. Reference implementation: Southwest Airlines Help Center.
 
 ## How to Use This
 

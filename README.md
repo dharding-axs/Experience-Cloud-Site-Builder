@@ -2,7 +2,7 @@
 
 A Claude Code skill and reproducible framework for building branded Salesforce Experience Cloud LWR sites with embedded Agentforce agents using ECV2 inline mode.
 
-**Reference implementation:** Southwest Airlines Help Center (Concept D)  
+**Reference implementation:** Southwest Airlines Help Center  
 **Stack:** Experience Cloud LWR · ECV2 Inline Mode · Agentforce Agent Script · LWC · Apex
 
 ---
@@ -59,7 +59,7 @@ Follow `BUILD_PROCESS.md` — it's a complete 10-phase runbook with every CLI co
 | **B — Inline Embedded** ⭐ | ECV2 inside branded LWC wrapper, split panels, utterance injection | ~8 hrs |
 | **C — Fullscreen Takeover** | CTA triggers full-viewport chat | ~6 hrs |
 
-Mode B (Concept D) is the reference implementation and the most fully documented.
+Mode B is the reference implementation and the most fully documented.
 
 ## Critical Rules (don't skip these)
 
@@ -73,7 +73,7 @@ Mode B (Concept D) is the reference implementation and the most fully documented
 ## Reference Implementation
 
 The Southwest Airlines Help Center (`/Users/dharding/Southwest-AMA-Agent-v2/`) demonstrates:
-- Concept D (inline ECV2) with FSM state machine
+- Inline ECV2 with FSM state machine
 - Pet travel wizard with split panel + 3-step data collection
 - Agent Script with pet travel topic, Knowledge search, contextual responses
 - Script injection pattern for chrome hiding and utterance injection
