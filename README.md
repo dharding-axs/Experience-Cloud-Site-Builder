@@ -19,6 +19,7 @@ A complete, battle-tested toolkit for going from zero to a deployed, branded Exp
 | `BUILD_PROCESS.md` | **Reproducible framework** — 10-phase step-by-step process with all code patterns, CLI commands, and 26 lessons learned |
 | `CLAUDE.md` | **Project instructions** — Context Claude Code reads automatically when working in this directory |
 | `templates/lwc/` | **Reference LWC components** — Validated templates for header, footer, topics, ECV2 wrapper, pet wizard |
+| `docs/architecture-guide.md` | **Architecture deep-dive** — For architects: data flow, LWS boundary, FSM reasoning, workarounds, sequence diagram |
 
 ## Key Architectural Decisions
 
@@ -90,9 +91,48 @@ Mode B is the reference implementation and the most fully documented.
 5. **Always `--ignore-conflicts` when deploying** — Source tracking diverges after retrieves
 6. **Head Markup changes require EB republish** — LWC JS/CSS changes do not
 
+## Org Compatibility
+
+### Minimum Requirements
+
+Every org must have these features enabled before the skill can deploy:
+
+| Requirement | How to verify |
+|-------------|--------------|
+| Experience Cloud (LWR) | `sf data query --query "SELECT Id FROM Network LIMIT 1"` — must return a record |
+| Agentforce Service Agent license | `sf data query --query "SELECT Id FROM BotDefinition LIMIT 1"` — must not error |
+| Messaging for In-App & Web | Setup → Messaging Settings — channel creation must be available |
+| Embedded Service Deployments | Setup → Embedded Service Deployments — must be accessible |
+
+### Recommended Org by Goal
+
+| Goal | Best org type | Expected agent latency |
+|------|--------------|----------------------|
+| Build and iterate | SDO / demo org | 15–30s (shared infrastructure) |
+| Customer demo | Developer sandbox from their org | 3–5s |
+| Prove production viability | Full sandbox | 3–5s |
+| Production deployment | Production org | 3–5s |
+| Reproduce build from scratch | Any org with required licenses | Depends on org tier |
+
+> **Note on SDO latency:** The slow agent join time on SDO orgs is an infrastructure issue — shared demo compute, not a code problem. The same LWC and agent deployed to a properly licensed sandbox will feel significantly faster. The skill's timing constants (`SEND_FALLBACK_MS`, `DEFAULT_TIMEOUT_MS`) are set generously for SDO use and can be reduced for production.
+
+### What Won't Work
+
+- **Scratch orgs** — No Experience Cloud site support, no Agentforce agent runtime
+- **Developer Edition (free)** — Experience Cloud available but Agentforce license not included by default; requires a partner/ISV template with Agentforce add-on
+- **Trailhead Playgrounds** — Not supported for ECV2 deployments
+
+---
+
+## For Architects
+
+`docs/architecture-guide.md` covers the full technical rationale — the three core problems this architecture solves, the LWS security boundary, the FSM state machine, the script injection pattern, the postMessage bridge, a sequence diagram, and a decision summary table with "Decision → Why → Workaround Required."
+
+---
+
 ## Reference Implementation
 
-The Southwest Airlines Help Center (`/Users/dharding/Southwest-AMA-Agent-v2/`) demonstrates:
+The Southwest Airlines Help Center demonstrates:
 - Inline ECV2 with FSM state machine
 - Pet travel wizard with split panel + 3-step data collection
 - Agent Script with pet travel topic, Knowledge search, contextual responses
